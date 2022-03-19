@@ -94,6 +94,12 @@ int main()
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
     //创建片段编译器对象
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -109,6 +115,22 @@ int main()
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
 
+    //检查程序对象是否编译错误
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::PROGRAM;;COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    //激活程序对象
+    glUseProgram(shaderProgram);
+
+    //删除着色器对象
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    
+
     while (!glfwWindowShouldClose(window))//检查GLFW是否被要求退出
     {
         //输入事件
@@ -118,13 +140,6 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用颜色
         glClear(GL_COLOR_BUFFER_BIT);//glClear清空屏幕颜色缓冲，须接受缓冲位GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT
 
-        
-
-        if (!success)
-        {
-            glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        }
 
         glfwSwapBuffers(window);//检查触发事件、更新窗口状态，并调用对应的回调函数
         glfwPollEvents();//交换颜色缓冲
