@@ -3,11 +3,25 @@
 #include <iostream>
 
 //顶点数组定义
+//float vertices[] = {
+//    -0.5f,-0.5f,0.0f,
+//    0.5f,-0.5f,0.0f,
+//    0.0f,0.5f,0.0f,
+//    
+//};
+
 float vertices[] = {
-    -0.5f,-0.5f,0.0f,
-    0.5f,-0.5f,0.0f,
-    0.0f,0.5f,0.0f
+    0.5f, 0.5f, 0.0f,   // 右上角
+    0.5f, -0.5f, 0.0f,  // 右下角
+    -0.5f, -0.5f, 0.0f, // 左下角
+    -0.5f, 0.5f, 0.0f   // 左上角
 };
+
+unsigned int indices[] = {
+    0,1,3,
+    1,2,3
+};
+
 
 //回调函数，当用户调整窗口时进行调整
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -54,6 +68,13 @@ int main()
     //注册函数，窗口调整大小时调用
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    //创建一个VAO
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+
+    //绑定VAO
+    glBindVertexArray(VAO);
+
     //VBO,顶点缓冲对象
     unsigned int VBO;
     glGenBuffers(1, &VBO);
@@ -65,6 +86,13 @@ int main()
     //GL_DYNAMIC_DRAW：数据会被改变很多。
     //GL_STREAM_DRAW ：数据每次绘制时都会改变。
 
+    //EBO,索引缓冲对象
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     //编译着色器，须运行时动态编译
     const char* vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
@@ -74,7 +102,7 @@ int main()
         "}\0";
 
     const char* fragmentShaderSource = "#version 330 core\n"
-        "out vec4 FragColor\n"
+        "out vec4 FragColor;\n"
         "void main()\n"
         "{"
         "   FragColor = vec4(1.0f,0.5f,0.2f,1.0f);\n"
@@ -129,7 +157,22 @@ int main()
     //删除着色器对象
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    //告诉OpenGL如何解析顶点数据
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    //第一个参数是需要配置的顶点属性，在上面设置了顶点着色器position=0，所以传入0
+    //第二个参数vec3是一个vec3，由是三个值组成
+    //第三个参数指定数据类型
+    //第四个参数定义是否希望数据标准化，GL_TRUE为所有数据会映射到0（有符号数据是-1）到1之间
+    //第五个参数步长，定义连续顶点属性组的间隔
+    //最后一个参数表示位置数据在起始位置的偏移量，由于位置数据在数组的开头，所以参数为0
+    glEnableVertexAttribArray(0);//以顶点属性作为参数，启用顶点属性
     
+    //线框模式
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    //解除线框模式
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     while (!glfwWindowShouldClose(window))//检查GLFW是否被要求退出
     {
@@ -140,6 +183,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用颜色
         glClear(GL_COLOR_BUFFER_BIT);//glClear清空屏幕颜色缓冲，须接受缓冲位GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT
 
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        //第一个参数是绘制OpenGL图元的类型
+        //第二个参数制定了顶点数组起始索引
+        //最后一个参数指定我们打算绘制多少个顶点
+        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //最后一个参数是EBO的偏移量（或者传递一个索引数组，但是这是当你不在使用索引缓冲对象的时候）
 
         glfwSwapBuffers(window);//检查触发事件、更新窗口状态，并调用对应的回调函数
         glfwPollEvents();//交换颜色缓冲
