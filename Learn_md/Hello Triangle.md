@@ -270,3 +270,12 @@ EBO，索引缓冲对象，可以用来引导点的绘制，并可以重复利�
 ```
 
 同VBO相似，只不过储存的是索引的
+
+用EBO绘制
+
+```cpp
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//最后一个参数是EBO的偏移量（或者传递一个索引数组，但是这是当你不在使用索引缓冲对象的时候）
+```
+

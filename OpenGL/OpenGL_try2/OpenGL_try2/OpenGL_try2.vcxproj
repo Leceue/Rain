@@ -142,9 +142,11 @@
   <ItemGroup>
     <ClCompile Include="..\..\OpenGL_try1\OpenGL_try1\glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="stb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\CodeCl\GLFW\include\shader\Shader.h" />
+    <ClInclude Include="..\..\..\..\..\CodeCl\GLFW\include\stb\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

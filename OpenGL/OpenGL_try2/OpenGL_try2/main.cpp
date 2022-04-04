@@ -1,14 +1,29 @@
 #include <glad/glad.h>
-#include <glfw3.h>
+#include <glfw/glfw3.h>
 #include <iostream>
 #include <shader/Shader.h>
+#include "stb/stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-Shader shader_1("D:\\Project_File\\Rain\\OpenGL\\GLSL\\try2_vet.frag", "D:\\Project_File\\Rain\\OpenGL\\GLSL\\try2_frag.frag");
+//float vertices[] = {
+//	-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+//	0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+//	0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+//};
 
 float vertices[] = {
-	-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-	0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+	//     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
+};
+
+unsigned int indices[] = {
+	0, 1, 3,
+	1, 2, 3
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -47,7 +62,14 @@ int main() {
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	unsigned int VAO, VBO;
+	//// 创建矩阵
+	//glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+	//glm::mat4 trans = glm::mat4(1.0f);
+	//trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+	//vec = trans * vec;
+	//std::cout << vec.x << vec.y << vec.z << std::endl;
+
+	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
@@ -55,12 +77,105 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	shader_1.use();
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	Shader shader_1("D:\\Project_File\\Rain\\OpenGL\\GLSL\\try2_vet.frag", "D:\\Project_File\\Rain\\OpenGL\\GLSL\\try2_frag.frag");
+
+
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	// create ID
+	unsigned int texture[2];
+	glGenTextures(2, texture);
+	// 第一个参数为需要生成纹理的个数
+
+	// 创建绑定
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+	// 为当前绑定的纹理对象设置环绕、过滤方式
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// 使用2D纹理，指定S和T轴（x、y），环绕方式为镜像重复
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// 由于OpenGL要求y轴的0.0坐标是在照片的底部，但是图片的y轴坐标0.0通常在顶部
+	//于是我们需要反转y轴
+	stbi_set_flip_vertically_on_load(true);
+
+	// create a image
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	//unsigned char* data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	// stb_image 将会用图像的宽度高度和颜色通道的个数填充这三个变量
+
+	if (data) {
+		// 用glTexImage2D生成纹理
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		// 第一个参数指定了纹理目标
+		// 设置为GL_TEXTURE_2D意味着会生成与当前绑定的纹理对象在同一个目标上的纹理（任何绑定到GL_TEXTURE_1D和GL_TEXTURE_3D的纹理不会受到影响）
+		// 第二个参数指定多级渐远纹理的级别，这里的0是基本级别
+		// 第三个参数告诉OpenGL希望储存的格式，这个图像只有RGB值
+		// 第四个和第五个参数设置最终纹理的宽度和高度
+		// 第六个参数应该总被设置为0
+		// 第七和第八个参数定义了源图的格式和数据类型，用RGB值加载该图像，并将他们储存为插入数组，我们将会传入对应值。
+		// 最后一个参数为真正的图像数据
+		glGenerateMipmap(GL_TEXTURE_2D);
+		// 为当前绑定的纹理自动生成所有需要的多级渐远纹理
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	//释放图像内存
+	stbi_image_free(data);
+
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data) {
+		// **note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Fail to load texture" << std::endl;
+	}
+
+	//释放图像内存
+	stbi_image_free(data);
+
+	shader_1.use();
+	shader_1.setInt("texture1", 0);
+	shader_1.setInt("texture2", 1);
+
+	// 构建矩阵
+	glm::mat4 trans = glm::mat4(1.0f);
+	//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+	trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+	trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	//传入mat4参数
+	unsigned int transformloc = glGetUniformLocation(shader_1.ID, "transform");
+	glUniformMatrix4fv(transformloc, 1, GL_FALSE, glm::value_ptr(trans));
 
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
@@ -70,12 +185,34 @@ int main() {
 
 		shader_1.use();
 
+		//glBindVertexArray(VAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// 绑定纹理
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture[0]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture[1]);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		//传入mat4参数
+		unsigned int transformloc = glGetUniformLocation(shader_1.ID, "transform");
+		glUniformMatrix4fv(transformloc, 1, GL_FALSE, glm::value_ptr(trans));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 

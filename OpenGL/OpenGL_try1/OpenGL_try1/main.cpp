@@ -1,7 +1,6 @@
 #include <glad/glad.h>
-#include <glfw3.h>
+#include <glfw/glfw3.h>
 #include <iostream>
-#include <shader/shader_s.h>
 
 //顶点数组定义
 //float vertices[] = {
