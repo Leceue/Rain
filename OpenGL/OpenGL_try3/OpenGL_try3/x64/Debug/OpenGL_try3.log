@@ -1,0 +1,18 @@
+﻿  main.cpp
+D:\Project_File\Rain\OpenGL\OpenGL_try3\OpenGL_try3\main.cpp(140,37): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+D:\Project_File\Rain\OpenGL\OpenGL_try3\OpenGL_try3\main.cpp(141,15): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+D:\Project_File\Rain\OpenGL\OpenGL_try3\OpenGL_try3\main.cpp(142,37): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+D:\Project_File\Rain\OpenGL\OpenGL_try3\OpenGL_try3\main.cpp(263,22): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+  OpenGL_try3.vcxproj -> D:\Project_File\Rain\OpenGL\OpenGL_try3\x64\Debug\OpenGL_try3.exe

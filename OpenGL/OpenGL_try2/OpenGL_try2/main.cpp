@@ -238,8 +238,8 @@ int main() {
 	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// 构建观察矩阵
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	//glm::mat4 view = glm::mat4(1.0f);
+	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 	// 构建投影矩阵，在这里我们使用透视投影
 	glm::mat4 projection = glm::mat4(1.0f);
@@ -259,7 +259,7 @@ int main() {
 	glUniformMatrix4fv(transformloc, 1, GL_FALSE, glm::value_ptr(trans));
 
 	shader_1.setMat4("model", model);
-	shader_1.setMat4("view", view);
+	//shader_1.setMat4("view", view);
 	shader_1.setMat4("projection", projection);
 
 	
@@ -285,6 +285,13 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, texture[1]);
 		glBindVertexArray(VAO);
 
+		float radius = 20.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 view;
+		view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		shader_1.setMat4("view", view);
+
 		for (unsigned int i = 0; i < 10; i++) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
@@ -294,7 +301,7 @@ int main() {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
+
 		// 构建旋转移动矩阵
 		//glm::mat4 trans = glm::mat4(1.0f);
 		//trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));

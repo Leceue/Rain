@@ -1,0 +1,3 @@
+﻿  client.cpp
+D:\Project_File\Rain\Socket\Socket_try1\client\client.cpp(19,32): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  client.vcxproj -> D:\Project_File\Rain\Socket\Socket_try1\client\Debug\client.exe
